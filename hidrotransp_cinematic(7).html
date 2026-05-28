@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HIDROTRANSP — Operador de Combustible Premium</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@100;200;300;400;500;600&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --f:#E8420A;--a:#FF7A00;--g:#FFB300;--ice:#00C6FF;
+  --dark:#030406;--d2:#07080F;--d3:#0C0D16;
+  --text:#EAE5DC;--muted:rgba(234,229,220,.4);
+}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{background:var(--dark);color:var(--text);font-family:'Outfit',sans-serif;font-weight:300;overflow-x:hidden;cursor:none}
+
+/* CURSOR CUSTOM */
+#CUR{position:fixed;top:0;left:0;width:8px;height:8px;background:#FF7A00;border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);mix-blend-mode:screen;transition:width .2s,height .2s,background .2s}
+#CURR{position:fixed;top:0;left:0;width:32px;height:32px;border:1px solid rgba(255,122,0,.5);border-radius:50%;pointer-events:none;z-index:99998;transform:translate(-50%,-50%)}
+
+/* CANVAS LAYERS */
+#bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+#hero-canvas{position:absolute;inset:0;z-index:2;pointer-events:none}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:30px 60px;display:flex;align-items:center;justify-content:space-between;transition:all .5s}
+nav.scrolled{background:rgba(3,4,6,.92);backdrop-filter:blur(30px);padding:18px 60px;border-bottom:1px solid rgba(255,122,0,.06)}
+.logo{display:flex;align-items:center;gap:12px}
+.logo img{height:36px;object-fit:contain;filter:brightness(1.4) saturate(1.2)}
+.logo-txt{font-family:'Bebas Neue';font-size:22px;letter-spacing:4px;background:linear-gradient(135deg,var(--a),var(--g));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo-sub{font-size:8px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;display:block}
+.navlinks{display:flex;gap:32px;list-style:none}
+.navlinks a{color:var(--muted);text-decoration:none;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;transition:color .3s;position:relative}
+.navlinks a::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:1px;background:var(--a);transform:scaleX(0);transition:transform .3s;transform-origin:left}
+.navlinks a:hover{color:var(--g)}.navlinks a:hover::after{transform:scaleX(1)}
+.nav-btn{background:none;border:1px solid rgba(255,122,0,.3);color:var(--a);padding:9px 22px;border-radius:100px;font-family:'Outfit';font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:none;transition:all .3s;backdrop-filter:blur(10px)}
+.nav-btn:hover{background:rgba(255,122,0,.1);border-color:var(--a);box-shadow:0 0 20px rgba(255,122,0,.2)}
+
+/* HERO */
+#hero{height:100vh;position:relative;display:flex;align-items:center;overflow:hidden}
+.hero-bg-imgs{position:absolute;inset:0;z-index:1}
+.hbg{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 2s ease;transform:scale(1.05)}
+.hbg.on{opacity:1;animation:kbz 8s ease forwards}
+@keyframes kbz{0%{transform:scale(1.05)}100%{transform:scale(1)}}
+.hero-vignette{position:absolute;inset:0;z-index:3;background:
+  radial-gradient(ellipse 60% 100% at 20% 50%,rgba(3,4,6,.75) 0%,transparent 60%),
+  linear-gradient(180deg,rgba(3,4,6,.5) 0%,transparent 30%,transparent 60%,rgba(3,4,6,.98) 100%)}
+.hero-content{position:relative;z-index:10;padding-left:60px;max-width:900px}
+.hero-kicker{display:flex;align-items:center;gap:10px;margin-bottom:28px;animation:up .9s .2s both}
+.kicker-line{width:40px;height:1px;background:linear-gradient(90deg,var(--f),var(--a))}
+.kicker-txt{font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--a)}
+.hero-h1{font-family:'Bebas Neue';line-height:.88;letter-spacing:1px;margin-bottom:24px}
+.hero-h1 .l1{display:block;font-size:clamp(72px,10.5vw,140px);color:#fff;animation:up .9s .35s both}
+.hero-h1 .l2{display:block;font-size:clamp(72px,10.5vw,140px);background:linear-gradient(100deg,var(--f) 0%,var(--a) 45%,var(--g) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:up .9s .5s both;filter:drop-shadow(0 0 60px rgba(232,66,10,.4))}
+.hero-sub{font-size:clamp(14px,1.4vw,17px);color:var(--muted);line-height:1.8;max-width:480px;margin-bottom:44px;font-weight:300;animation:up .9s .65s both}
+.hero-actions{display:flex;gap:14px;animation:up .9s .8s both}
+.btn-main{background:linear-gradient(135deg,var(--f),var(--a));color:#fff;border:none;padding:16px 40px;border-radius:100px;font-family:'Outfit';font-size:12px;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;cursor:none;transition:all .3s;text-decoration:none;box-shadow:0 8px 32px rgba(232,66,10,.35)}
+.btn-main:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 16px 48px rgba(232,66,10,.55)}
+.btn-sec{color:var(--text);text-decoration:none;padding:16px 40px;border-radius:100px;border:1px solid rgba(255,255,255,.1);font-family:'Outfit';font-size:12px;letter-spacing:2.5px;text-transform:uppercase;cursor:none;transition:all .3s;backdrop-filter:blur(8px)}
+.btn-sec:hover{border-color:rgba(255,122,0,.4);color:var(--g)}
+.hero-scroll-ind{position:absolute;bottom:40px;left:60px;z-index:10;display:flex;align-items:center;gap:12px;animation:up .9s 1s both}
+.si-txt{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted)}
+.si-bar{width:48px;height:1px;background:linear-gradient(90deg,rgba(255,122,0,.7),transparent)}
+.hero-stats{position:absolute;right:60px;bottom:60px;z-index:10;display:flex;flex-direction:column;gap:24px;animation:up .9s 1s both}
+.hstat{text-align:right}
+.hstat-n{font-family:'Bebas Neue';font-size:48px;line-height:1;background:linear-gradient(135deg,var(--a),var(--g));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hstat-l{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.hstat-div{width:1px;height:40px;background:rgba(255,255,255,.06);align-self:flex-end}
+.slide-ind{position:absolute;bottom:44px;left:50%;transform:translateX(-50%);z-index:10;display:flex;gap:6px}
+.si{width:20px;height:1.5px;background:rgba(255,255,255,.15);border-radius:2px;transition:all .5s;cursor:none}
+.si.on{width:36px;background:var(--a)}
+
+@keyframes up{from{opacity:0;transform:translateY(48px)}to{opacity:1;transform:translateY(0)}}
+
+/* MARQUEE STRIP */
+.marquee-strip{background:rgba(232,66,10,.06);border-top:1px solid rgba(232,66,10,.1);border-bottom:1px solid rgba(232,66,10,.1);padding:16px 0;overflow:hidden;position:relative;z-index:10}
+.marquee-track{display:flex;gap:60px;width:max-content;animation:mq 20s linear infinite}
+@keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.mq-item{display:flex;align-items:center;gap:10px;white-space:nowrap;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,122,0,.6)}
+.mq-dot{width:3px;height:3px;border-radius:50%;background:var(--f)}
+
+/* THREE.JS SECTION */
+#scene3d{position:relative;height:100vh;overflow:hidden;display:flex;align-items:center;background:var(--dark)}
+#three-canvas{position:absolute;inset:0;z-index:0}
+.s3d-content{position:relative;z-index:10;padding:0 60px;max-width:520px}
+.s3d-tag{font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--a);margin-bottom:16px}
+.s3d-h{font-family:'Bebas Neue';font-size:clamp(56px,7vw,90px);letter-spacing:2px;line-height:.92;margin-bottom:20px}
+.s3d-p{color:var(--muted);font-size:15px;line-height:1.8;max-width:420px;margin-bottom:36px}
+.metrics{display:flex;flex-direction:column;gap:0;max-width:360px}
+.metric{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.metric-name{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+.metric-val{font-family:'Space Mono';font-size:14px;color:var(--a)}
+/* Truck 3D scene label */
+.truck-label{position:absolute;bottom:48px;right:60px;z-index:10;text-align:right}
+.truck-label-main{font-family:'Bebas Neue';font-size:18px;letter-spacing:3px;color:var(--a)}
+.truck-label-sub{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+/* Loading indicator for truck texture */
+.truck-loading{position:absolute;top:50%;left:60%;transform:translate(-50%,-50%);z-index:5;pointer-events:none;opacity:1;transition:opacity 1s}
+.truck-loading.hide{opacity:0}
+
+/* PRODUCTS 3D CARDS */
+#products{padding:130px 60px;position:relative;overflow:hidden}
+#products::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:800px;height:800px;background:radial-gradient(circle,rgba(255,122,0,.04) 0%,transparent 65%);pointer-events:none}
+.section-intro{text-align:center;margin-bottom:80px}
+.stag{font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--a);display:block;margin-bottom:14px}
+.sh{font-family:'Bebas Neue';font-size:clamp(52px,6vw,80px);letter-spacing:2px;line-height:1;margin-bottom:14px;background:linear-gradient(135deg,#fff 40%,rgba(255,255,255,.5) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sp{color:var(--muted);font-size:15px;max-width:440px;margin:0 auto}
+.prd-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;max-width:1200px;margin:0 auto}
+.prd{position:relative;overflow:hidden;aspect-ratio:4/5;cursor:none}
+.prd img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .8s cubic-bezier(.23,1,.32,1),filter .6s}
+.prd:hover img{transform:scale(1.08);filter:brightness(1.1) saturate(1.2)}
+.prd-overlay{position:absolute;inset:0;background:linear-gradient(180deg,transparent 30%,rgba(3,4,6,.96) 100%);z-index:1}
+.prd-glow{position:absolute;inset:0;opacity:0;transition:opacity .5s;z-index:2;background:radial-gradient(ellipse 80% 80% at 50% 0%,rgba(232,66,10,.1) 0%,transparent 70%)}
+.prd:hover .prd-glow{opacity:1}
+.prd-body{position:absolute;bottom:0;left:0;right:0;padding:36px 32px;z-index:3;transform:translateY(60px);transition:transform .5s cubic-bezier(.23,1,.32,1)}
+.prd:hover .prd-body{transform:translateY(0)}
+.prd-tag{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--a);margin-bottom:8px}
+.prd-name{font-family:'Bebas Neue';font-size:42px;letter-spacing:1px;line-height:1;margin-bottom:12px}
+.prd-desc{font-size:12px;color:var(--muted);line-height:1.7;opacity:0;transform:translateY(12px);transition:all .4s .1s}
+.prd:hover .prd-desc{opacity:1;transform:translateY(0)}
+.prd-cta{display:inline-flex;align-items:center;gap:8px;margin-top:16px;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--a);opacity:0;transition:opacity .4s .15s}
+.prd:hover .prd-cta{opacity:1}
+.prd-num{position:absolute;top:24px;right:24px;font-family:'Space Mono';font-size:11px;color:rgba(255,255,255,.2);z-index:3}
+
+/* BENTO GALLERY */
+#ops{padding:130px 60px;overflow:hidden;position:relative}
+.ops-header{margin-bottom:64px;display:flex;justify-content:space-between;align-items:flex-end;max-width:1200px;margin-left:auto;margin-right:auto}
+.bento{display:grid;grid-template-columns:repeat(12,1fr);grid-template-rows:280px 200px;gap:10px;max-width:1200px;margin:0 auto}
+.bt{border-radius:18px;overflow:hidden;position:relative;cursor:none}
+.bt img{width:100%;height:100%;object-fit:cover;transition:transform .9s cubic-bezier(.23,1,.32,1),filter .5s}
+.bt:hover img{transform:scale(1.07);filter:brightness(1.08) saturate(1.15)}
+.bt-over{position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(3,4,6,.85) 100%);opacity:0;transition:opacity .4s}
+.bt:hover .bt-over{opacity:1}
+.bt-tag{position:absolute;bottom:20px;left:20px;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,122,0,.9);opacity:0;transform:translateY(8px);transition:all .35s .05s}
+.bt:hover .bt-tag{opacity:1;transform:translateY(0)}
+/* scroll-driven reveal per cell */
+.bt{opacity:0;transform:translateY(40px) scale(.97);transition:opacity .75s cubic-bezier(.23,1,.32,1),transform .75s cubic-bezier(.23,1,.32,1)}
+.bt.bv{opacity:1;transform:none}
+.bt:nth-child(1){grid-column:span 5;grid-row:span 2}
+.bt:nth-child(2){grid-column:span 4}
+.bt:nth-child(3){grid-column:span 3}
+.bt:nth-child(4){grid-column:span 3}
+.bt:nth-child(5){grid-column:span 4}
+/* stagger delays */
+.bt:nth-child(1){transition-delay:0s}
+.bt:nth-child(2){transition-delay:.08s}
+.bt:nth-child(3){transition-delay:.16s}
+.bt:nth-child(4){transition-delay:.24s}
+.bt:nth-child(5){transition-delay:.32s}
+/* accent stripe on first big card */
+.bt:nth-child(1)::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--f),var(--a),transparent);transform:scaleX(0);transform-origin:left;transition:transform .6s cubic-bezier(.23,1,.32,1)}
+.bt:nth-child(1).bv::after{transform:scaleX(1)}
+/* counter badge on big card */
+.bt-counter{position:absolute;top:20px;right:20px;background:rgba(3,4,6,.75);backdrop-filter:blur(12px);border:1px solid rgba(255,122,0,.2);border-radius:100px;padding:5px 14px;font-family:'Space Mono',monospace;font-size:10px;color:var(--a);letter-spacing:1px}
+
+/* SERVICES HORIZONTAL */
+#svcs{padding:130px 60px;background:var(--d2)}
+.svc-wrap{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:100px;align-items:center}
+.svc-left{}
+.svc-items{margin-top:50px}
+.svc-item{display:grid;grid-template-columns:1px 1fr;gap:24px;padding:28px 0;border-bottom:1px solid rgba(255,255,255,.04);cursor:none;transition:all .3s}
+.svc-item:hover .svc-bar{background:var(--a)}
+.svc-bar{width:1px;background:rgba(255,255,255,.08);transition:background .3s;flex-shrink:0;border-radius:2px}
+.svc-inner{padding-left:0}
+.svc-n{font-size:16px;font-weight:500;margin-bottom:6px;transition:color .3s}
+.svc-item:hover .svc-n{color:var(--a)}
+.svc-d{font-size:13px;color:var(--muted);line-height:1.7}
+.svc-right{position:relative}
+.svc-img-main{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:28px;display:block;box-shadow:0 60px 120px rgba(0,0,0,.6)}
+.svc-tag-float{position:absolute;bottom:32px;right:-20px;background:rgba(3,4,6,.9);backdrop-filter:blur(20px);border:1px solid rgba(255,122,0,.12);border-radius:20px;padding:22px 26px;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.svc-tag-n{font-family:'Bebas Neue';font-size:44px;background:linear-gradient(135deg,var(--a),var(--g));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+.svc-tag-l{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.svc-glow{position:absolute;top:-40px;right:-60px;width:300px;height:300px;background:radial-gradient(circle,rgba(255,122,0,.08) 0%,transparent 70%);pointer-events:none;border-radius:50%}
+
+/* CLIENTS */
+#clients{padding:80px 60px;border-top:1px solid rgba(255,255,255,.03)}
+.cl-label{text-align:center;font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--muted);margin-bottom:48px}
+.cl-scroll{overflow:hidden;position:relative}
+.cl-scroll::before,.cl-scroll::after{content:'';position:absolute;top:0;bottom:0;width:160px;z-index:2}
+.cl-scroll::before{left:0;background:linear-gradient(90deg,var(--dark),transparent)}
+.cl-scroll::after{right:0;background:linear-gradient(-90deg,var(--dark),transparent)}
+.cl-track{display:flex;gap:64px;align-items:center;animation:mq 22s linear infinite;width:max-content}
+.cl-track img{height:32px;object-fit:contain;filter:brightness(0) invert(1);opacity:.18;transition:opacity .3s;flex-shrink:0}
+.cl-track img:hover{opacity:.45}
+
+/* CONTACT */
+#contact{padding:130px 60px;position:relative;overflow:hidden}
+#contact::before{content:'';position:absolute;top:0;right:0;width:600px;height:600px;background:radial-gradient(circle,rgba(232,66,10,.06) 0%,transparent 70%);pointer-events:none}
+.contact-wrap{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:90px;align-items:start}
+.con-info{}
+.con-big{font-family:'Bebas Neue';font-size:clamp(60px,7vw,88px);letter-spacing:2px;line-height:.9;margin-bottom:24px}
+.con-big span{background:linear-gradient(135deg,var(--f),var(--a));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.con-p{color:var(--muted);font-size:14px;line-height:1.8;max-width:380px;margin-bottom:48px}
+.con-details{display:flex;flex-direction:column;gap:0}
+.cd{display:flex;align-items:center;gap:18px;padding:20px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.cd-icon{width:44px;height:44px;border-radius:14px;background:rgba(255,122,0,.07);border:1px solid rgba(255,122,0,.12);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;transition:all .3s}
+.cd:hover .cd-icon{background:rgba(255,122,0,.14);box-shadow:0 0 20px rgba(255,122,0,.15)}
+.cd-l{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.cd-v{font-size:14px;font-weight:400}
+.con-form{background:var(--d3);border:1px solid rgba(255,255,255,.05);border-radius:32px;padding:52px}
+.cf-title{font-family:'Bebas Neue';font-size:38px;letter-spacing:2px;margin-bottom:6px}
+.cf-sub{color:var(--muted);font-size:13px;margin-bottom:36px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.field input,.field textarea,.field select{width:100%;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:15px 18px;color:var(--text);font-family:'Outfit';font-size:13px;outline:none;transition:border-color .3s;resize:none;appearance:none}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:rgba(255,122,0,.4);background:rgba(255,122,0,.02)}
+.field textarea{height:110px}
+.field select option{background:#0C0D16}
+.cf-btn{width:100%;background:linear-gradient(135deg,var(--f),var(--a));border:none;padding:17px;border-radius:14px;font-family:'Outfit';font-size:12px;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;color:#fff;cursor:none;transition:all .3s;margin-top:6px}
+.cf-btn:hover{transform:translateY(-2px);box-shadow:0 14px 36px rgba(232,66,10,.45)}
+
+/* CTA */
+#cta{padding:180px 60px;text-align:center;position:relative;overflow:hidden}
+#cta-canvas{position:absolute;inset:0;z-index:0;pointer-events:none}
+.cta-content{position:relative;z-index:10}
+.cta-h{font-family:'Bebas Neue';font-size:clamp(72px,9vw,120px);letter-spacing:3px;line-height:.88;margin-bottom:24px;background:linear-gradient(135deg,#fff 0%,rgba(255,255,255,.55) 50%,var(--g) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.cta-p{color:var(--muted);font-size:17px;max-width:480px;margin:0 auto 48px}
+.cta-btns{display:flex;gap:14px;justify-content:center}
+
+/* FOOTER */
+footer{background:var(--d2);border-top:1px solid rgba(255,255,255,.04);padding:80px 60px 40px}
+.ft{max-width:1200px;margin:0 auto}
+.ft-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:60px;margin-bottom:64px}
+.ft-logo img{height:38px;object-fit:contain;filter:brightness(1.4);margin-bottom:14px;display:block}
+.ft-logo-txt{font-family:'Bebas Neue';font-size:20px;letter-spacing:3px;background:linear-gradient(135deg,var(--a),var(--g));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.ft-desc{color:var(--muted);font-size:12px;line-height:1.9;max-width:240px;margin-top:12px}
+.ft-col h4{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--a);margin-bottom:22px}
+.ft-col ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+.ft-col a{color:var(--muted);text-decoration:none;font-size:12px;transition:color .3s}
+.ft-col a:hover{color:var(--text)}
+.ft-bottom{display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(255,255,255,.04);padding-top:28px}
+.ft-copy{color:var(--muted);font-size:11px}
+.ft-soc{display:flex;gap:10px}
+.fsoc{width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;text-decoration:none;transition:all .3s;cursor:none}
+.fsoc:hover{border-color:rgba(255,122,0,.3);color:var(--a)}
+
+/* REVEAL */
+.rv{opacity:0;transform:translateY(60px);transition:opacity .9s cubic-bezier(.23,1,.32,1),transform .9s cubic-bezier(.23,1,.32,1)}
+.rv.on{opacity:1;transform:translateY(0)}
+.rv-d1{transition-delay:.1s}.rv-d2{transition-delay:.2s}.rv-d3{transition-delay:.3s}
+
+/* RESPONSIVE */
+@media(max-width:1024px){
+  nav,nav.scrolled{padding:16px 24px}
+  .navlinks{display:none}
+  #hero .hero-content{padding-left:24px}
+  .hero-stats{right:24px;bottom:80px}
+  #products,#ops,#svcs,#clients,#contact,#cta{padding:80px 24px}
+  .ops-header{padding:0 24px}
+  .prd-grid{grid-template-columns:1fr}
+  .prd{aspect-ratio:16/10}.prd-body{transform:translateY(0)}
+  .prd-desc,.prd-cta{opacity:1;transform:none}
+  .svc-wrap{grid-template-columns:1fr;gap:48px}
+  .svc-tag-float{right:0}
+  .contact-wrap{grid-template-columns:1fr}
+  .ft-top{grid-template-columns:1fr 1fr;gap:36px}
+  footer{padding:60px 24px 32px}
+  .hero-scroll-ind{left:24px}
+  .slide-ind{bottom:80px}
+}
+@media(max-width:600px){
+  .hero-stats{display:none}
+  .ft-top{grid-template-columns:1fr}
+  .hero-h1 .l1,.hero-h1 .l2{font-size:68px}
+  .cta-btns{flex-direction:column;align-items:center}
+  .hero-actions{flex-direction:column}
+}
+</style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+<div id="CUR"></div>
+<div id="CURR"></div>
+
+<nav id="NAV">
+  <div class="logo">
+    <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/cropped-LogoCliente-350x89.png" alt="Hidrotransp" onerror="this.style.display='none'">
+    <div><span class="logo-txt">HIDROTRANSP</span><span class="logo-sub">Operador de Combustible</span></div>
+  </div>
+  <ul class="navlinks">
+    <li><a href="#products">Productos</a></li>
+    <li><a href="#ops">Operaciones</a></li>
+    <li><a href="#svcs">Servicios</a></li>
+    <li><a href="#clients">Clientes</a></li>
+    <li><a href="#contact">Contacto</a></li>
+  </ul>
+  <button class="nav-btn" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">987 547 338</button>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg-imgs" id="HBS">
+    <div class="hbg on" style="background-image:url('https://www.hidrotransp.com.pe/wp-content/uploads/2025/04/0e0454bb-46d2-4204-b6b6-912b6c8eb49a.jpg')"></div>
+    <div class="hbg" style="background-image:url('https://www.hidrotransp.com.pe/wp-content/uploads/2023/10/1-IMAGEN-CON-LA-QUE-INICIA-RECORTAR-DE-ACUERDO-AL-EJEMPLO-EN-EL-WORD.jpeg')"></div>
+    <div class="hbg" style="background-image:url('https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/CONSIDERAR-ESTA-IMAGEN-PARA-EL-PUNTO-3-DE-LAS-MODIFICACIONES-SOLICITADAS-scaled.jpeg')"></div>
+    <div class="hbg" style="background-image:url('https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/Slider.jpeg')"></div>
+  </div>
+  <div class="hero-vignette"></div>
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-content">
+    <div class="hero-kicker"><div class="kicker-line"></div><span class="kicker-txt">Más de 14 años en hidrocarburos</span></div>
+    <h1 class="hero-h1">
+      <span class="l1">Energía que</span>
+      <span class="l2">mueve el Perú</span>
+    </h1>
+    <p class="hero-sub">Operador de combustible y minorista de GLP a granel. Diesel B5, GLP y Urea líquida con la más alta calidad, puntualidad y seguridad garantizada.</p>
+    <div class="hero-actions">
+      <a href="#contact" class="btn-main">Solicitar cotización</a>
+      <a href="#products" class="btn-sec">Ver productos →</a>
+    </div>
+  </div>
+  <div class="hero-scroll-ind"><div class="si-bar"></div><span class="si-txt">Scroll</span></div>
+  <div class="hero-stats">
+    <div class="hstat"><div class="hstat-n">14+</div><div class="hstat-l">Años de experiencia</div></div>
+    <div class="hstat-div"></div>
+    <div class="hstat"><div class="hstat-n">16+</div><div class="hstat-l">Clientes corporativos</div></div>
+    <div class="hstat-div"></div>
+    <div class="hstat"><div class="hstat-n">24/7</div><div class="hstat-l">Operación continua</div></div>
+  </div>
+  <div class="slide-ind">
+    <div class="si on"></div><div class="si"></div><div class="si"></div><div class="si"></div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-strip">
+  <div class="marquee-track">
+    <span class="mq-item"><span class="mq-dot"></span>Diesel B5 Certificado</span>
+    <span class="mq-item"><span class="mq-dot"></span>GLP a Granel</span>
+    <span class="mq-item"><span class="mq-dot"></span>Urea Líquida AdBlue</span>
+    <span class="mq-item"><span class="mq-dot"></span>Red Valuemi</span>
+    <span class="mq-item"><span class="mq-dot"></span>Flota Certificada</span>
+    <span class="mq-item"><span class="mq-dot"></span>Despacho 24/7</span>
+    <span class="mq-item"><span class="mq-dot"></span>OSINERGMIN</span>
+    <span class="mq-item"><span class="mq-dot"></span>Lima Metropolitana</span>
+    <span class="mq-item"><span class="mq-dot"></span>Diesel B5 Certificado</span>
+    <span class="mq-item"><span class="mq-dot"></span>GLP a Granel</span>
+    <span class="mq-item"><span class="mq-dot"></span>Urea Líquida AdBlue</span>
+    <span class="mq-item"><span class="mq-dot"></span>Red Valuemi</span>
+    <span class="mq-item"><span class="mq-dot"></span>Flota Certificada</span>
+    <span class="mq-item"><span class="mq-dot"></span>Despacho 24/7</span>
+    <span class="mq-item"><span class="mq-dot"></span>OSINERGMIN</span>
+    <span class="mq-item"><span class="mq-dot"></span>Lima Metropolitana</span>
+  </div>
+</div>
+
+<!-- THREE.JS SCENE — TRUCK 3D -->
+<section id="scene3d">
+  <canvas id="three-canvas"></canvas>
+  <div class="s3d-content rv">
+    <div class="s3d-tag">— Flota en movimiento —</div>
+    <h2 class="s3d-h">Líderes en<br>hidrocarburos</h2>
+    <p class="s3d-p">Flota moderna con GPS en tiempo real, mantenimiento preventivo y operadores certificados. Tu combustible llega seguro y puntual, siempre.</p>
+    <div class="metrics">
+      <div class="metric"><span class="metric-name">Años activos</span><span class="metric-val">14+</span></div>
+      <div class="metric"><span class="metric-name">Clientes activos</span><span class="metric-val">16+</span></div>
+      <div class="metric"><span class="metric-name">Disponibilidad</span><span class="metric-val">99.8%</span></div>
+      <div class="metric"><span class="metric-name">Certificación</span><span class="metric-val">OSINERGMIN</span></div>
+    </div>
+  </div>
+  <div class="truck-label">
+    <div class="truck-label-main">FLOTA HIDROTRANSP</div>
+    <div class="truck-label-sub">Cisterna — Despacho 24/7</div>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<section id="products">
+  <div class="section-intro rv">
+    <span class="stag">— Nuestros Productos —</span>
+    <h2 class="sh">Combustible premium<br>para cada necesidad</h2>
+    <p class="sp">Calidad certificada, entrega puntual y precios competitivos en cada despacho.</p>
+  </div>
+  <div class="prd-grid">
+    <div class="prd rv">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/batch_WhatsApp-Image-2023-08-22-at-2.39.40-PM-2.jpeg" alt="Diesel" onerror="this.src='https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/Slider.jpeg'">
+      <div class="prd-overlay"></div><div class="prd-glow"></div>
+      <div class="prd-num">01</div>
+      <div class="prd-body">
+        <div class="prd-tag">Combustible Líquido</div>
+        <div class="prd-name">Diesel B5</div>
+        <p class="prd-desc">Para vehículos pesados, maquinaria industrial y flota de transporte. Alta eficiencia, bajo impacto ambiental. Transporte en cisterna especializada, despacho 24/7.</p>
+        <div class="prd-cta">Más información →</div>
+      </div>
+    </div>
+    <div class="prd rv rv-d1">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/10/WhatsApp-Image-2023-09-27-at-9.46.15-AM.jpeg" alt="GLP" onerror="this.src='https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/Slider.jpeg'">
+      <div class="prd-overlay"></div><div class="prd-glow"></div>
+      <div class="prd-num">02</div>
+      <div class="prd-body">
+        <div class="prd-tag">Gas Licuado</div>
+        <div class="prd-name">GLP a Granel</div>
+        <p class="prd-desc">Operador minorista de GLP para industria y comercio. Vehículo cisterna de última generación, operadores certificados, cobertura Lima Metropolitana.</p>
+        <div class="prd-cta">Más información →</div>
+      </div>
+    </div>
+    <div class="prd rv rv-d2">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/10/WhatsApp-Image-2023-09-27-at-9.45.50-AM-1.jpeg" alt="Urea" onerror="this.src='https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/Slider.jpeg'">
+      <div class="prd-overlay"></div><div class="prd-glow"></div>
+      <div class="prd-num">03</div>
+      <div class="prd-body">
+        <div class="prd-tag">Aditivo SCR</div>
+        <div class="prd-name">Urea Líquida</div>
+        <p class="prd-desc">Solución AdBlue para sistemas SCR Euro V y VI. Reduce emisiones de NOx hasta 90%. Norma ISO 22241. Entrega en bidones y a granel.</p>
+        <div class="prd-cta">Más información →</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BENTO GALLERY -->
+<section id="ops">
+  <div class="ops-header rv">
+    <div>
+      <span class="stag">— Operaciones en Campo —</span>
+      <h2 class="sh" style="margin-bottom:0">Flota moderna.<br>Equipo experto.</h2>
+    </div>
+    <p class="sp" style="max-width:260px;text-align:right">14 años de operaciones en Lima y a nivel nacional.</p>
+  </div>
+  <div class="bento" id="BENTO">
+    <div class="bt"><img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/CONSIDERAR-ESTA-IMAGEN-PARA-EL-PUNTO-3-DE-LAS-MODIFICACIONES-SOLICITADAS-scaled.jpeg" alt="Estaciones"><div class="bt-num">01</div><div class="bt-over"></div><div class="bt-tag">Estaciones de servicio</div></div>
+    <div class="bt"><img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/batch_WhatsApp-Image-2023-08-22-at-2.39.31-PM-1.jpeg" alt="Flota"><div class="bt-num">02</div><div class="bt-over"></div><div class="bt-tag">Flota certificada</div></div>
+    <div class="bt"><img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/batch_WhatsApp-Image-2023-08-22-at-2.39.32-PM.jpeg" alt="Despacho"><div class="bt-num">03</div><div class="bt-over"></div><div class="bt-tag">Despacho controlado</div></div>
+    <div class="bt"><img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/batch_WhatsApp-Image-2023-08-22-at-2.39.36-PM-4.jpeg" alt="Seguridad"><div class="bt-num">04</div><div class="bt-over"></div><div class="bt-tag">Seguridad OSINERGMIN</div></div>
+    <div class="bt"><img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/10/WhatsApp-Image-2023-09-27-at-9.45.51-AM-3.jpeg" alt="Logística"><div class="bt-num">05</div><div class="bt-over"></div><div class="bt-tag">Logística integral</div></div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="svcs">
+  <div class="svc-wrap">
+    <div class="svc-left rv">
+      <span class="stag">— Por qué elegirnos —</span>
+      <h2 class="sh">Soluciones<br>confiables de<br>abastecimiento</h2>
+      <div class="svc-items">
+        <div class="svc-item"><div class="svc-bar"></div><div class="svc-inner"><div class="svc-n">⏱ Puntualidad garantizada</div><p class="svc-d">Entregamos exactamente cuando lo necesitas. Tu operación no puede esperar y nosotros lo sabemos.</p></div></div>
+        <div class="svc-item"><div class="svc-bar"></div><div class="svc-inner"><div class="svc-n">🛡 Seguridad certificada</div><p class="svc-d">Personal con EPP completo, vehículos inspeccionados, documentación OSINERGMIN al día en todo momento.</p></div></div>
+        <div class="svc-item"><div class="svc-bar"></div><div class="svc-inner"><div class="svc-n">🚛 Flota moderna con GPS</div><p class="svc-d">Cisternas de última generación con rastreo satelital en tiempo real y mantenimiento preventivo riguroso.</p></div></div>
+        <div class="svc-item"><div class="svc-bar"></div><div class="svc-inner"><div class="svc-n">🏪 Red Inversiones Valuemi</div><p class="svc-d">Red de estaciones de servicio en Lima con atención personalizada para el consumidor final.</p></div></div>
+      </div>
+    </div>
+    <div class="svc-right rv rv-d2">
+      <div class="svc-glow"></div>
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/batch_WhatsApp-Image-2023-08-22-at-2.39.35-PM-1.jpeg" alt="Operaciones" class="svc-img-main" onerror="this.src='https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/Slider.jpeg'">
+      <div class="svc-tag-float">
+        <div class="svc-tag-n">100%</div>
+        <div class="svc-tag-l">Certificado OSINERGMIN</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CLIENTS -->
+<section id="clients">
+  <div class="cl-label">Nuestros principales clientes confían en nosotros</div>
+  <div class="cl-scroll">
+    <div class="cl-track" id="CLT">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/1-1.png" alt="c1">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/2-1.png" alt="c2">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/3-1.png" alt="c3">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/4-1.png" alt="c4">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/5-1.png" alt="c5">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/6-1.png" alt="c6">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/7-1.png" alt="c7">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/8-1.png" alt="c8">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/9-1.png" alt="c9">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/10-1.png" alt="c10">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/11-1.png" alt="c11">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/12-1.png" alt="c12">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/13-1.png" alt="c13">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/14-1.png" alt="c14">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/15-1.png" alt="c15">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/16-1.png" alt="c16">
+      <!-- duplicate -->
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/1-1.png" alt="c1">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/2-1.png" alt="c2">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/3-1.png" alt="c3">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/4-1.png" alt="c4">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/5-1.png" alt="c5">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/6-1.png" alt="c6">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/7-1.png" alt="c7">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/8-1.png" alt="c8">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/9-1.png" alt="c9">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/10-1.png" alt="c10">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/11-1.png" alt="c11">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/12-1.png" alt="c12">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/13-1.png" alt="c13">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/14-1.png" alt="c14">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/15-1.png" alt="c15">
+      <img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/16-1.png" alt="c16">
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-wrap">
+    <div class="con-info rv">
+      <h2 class="con-big">¿Listo para<br><span>abastecer</span><br>tu flota?</h2>
+      <p class="con-p">Contáctanos y recibe una propuesta personalizada. Respondemos en menos de 2 horas, los 7 días de la semana.</p>
+      <div class="con-details">
+        <div class="cd"><div class="cd-icon">📞</div><div><div class="cd-l">Teléfono directo</div><div class="cd-v">987 547 338</div></div></div>
+        <div class="cd"><div class="cd-icon">✉️</div><div><div class="cd-l">Correo electrónico</div><div class="cd-v">contacto@hidrotransp.com.pe</div></div></div>
+        <div class="cd"><div class="cd-icon">📍</div><div><div class="cd-l">Oficina principal</div><div class="cd-v">Cal. Ignacio Torote 515, Dpto. 202, Los Olivos – Lima</div></div></div>
+      </div>
+    </div>
+    <div class="con-form rv rv-d2">
+      <div class="cf-title">Solicitar cotización</div>
+      <p class="cf-sub">Completa el formulario y te respondemos hoy.</p>
+      <div class="field"><label>Nombre completo</label><input type="text" placeholder="Tu nombre"></div>
+      <div class="field"><label>Correo</label><input type="email" placeholder="correo@empresa.com"></div>
+      <div class="field"><label>Teléfono</label><input type="tel" placeholder="987 000 000"></div>
+      <div class="field"><label>Producto de interés</label>
+        <select><option value="">Selecciona un producto</option><option>Diesel B5</option><option>GLP a Granel</option><option>Urea Líquida</option><option>Estaciones Valuemi</option></select>
+      </div>
+      <div class="field"><label>Mensaje</label><textarea placeholder="Cuéntanos sobre tus necesidades…"></textarea></div>
+      <button class="cf-btn">Enviar mensaje →</button>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta">
+  <canvas id="cta-canvas"></canvas>
+  <div class="cta-content">
+    <span class="stag rv">— Únete a nuestra red —</span>
+    <h2 class="cta-h rv">Confía en quien<br>te abastece</h2>
+    <p class="cta-p rv">14 años de experiencia, flota certificada y un equipo comprometido con tu operación las 24 horas.</p>
+    <div class="cta-btns rv">
+      <a href="tel:987547338" class="btn-main">Llamar ahora</a>
+      <a href="mailto:contacto@hidrotransp.com.pe" class="btn-sec">Escribir correo</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="ft">
+    <div class="ft-top">
+      <div>
+        <div class="ft-logo"><img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/cropped-LogoCliente-350x89.png" alt="Hidrotransp" onerror="this.style.display='none'"><span class="ft-logo-txt">HIDROTRANSP</span></div>
+        <p class="ft-desc">Operador de combustible y minorista de GLP a granel con más de 14 años en el mercado peruano de hidrocarburos.</p>
+        <div style="margin-top:16px"><img src="https://www.hidrotransp.com.pe/wp-content/uploads/2023/09/InversionesValue.png" alt="Valuemi" style="height:24px;object-fit:contain;filter:brightness(1.2);opacity:.5" onerror="this.style.display='none'"></div>
+      </div>
+      <div class="ft-col"><h4>Productos</h4><ul><li><a href="#">Diesel B5</a></li><li><a href="#">GLP a Granel</a></li><li><a href="#">Urea Líquida</a></li><li><a href="#">Estaciones Valuemi</a></li></ul></div>
+      <div class="ft-col"><h4>Empresa</h4><ul><li><a href="https://www.hidrotransp.com.pe/quienes-somos/">Quiénes somos</a></li><li><a href="https://www.hidrotransp.com.pe/operaciones/">Operaciones</a></li><li><a href="https://www.hidrotransp.com.pe/noticias/">Noticias</a></li><li><a href="https://www.hidrotransp.com.pe/trabaje-con-nosotros/">Trabaja con nosotros</a></li></ul></div>
+      <div class="ft-col"><h4>Legal</h4><ul><li><a href="https://www.hidrotransp.com.pe/politica-de-privacidad/">Privacidad</a></li><li><a href="https://www.hidrotransp.com.pe/terminos-y-condiciones/">Términos</a></li><li><a href="#">FAQ</a></li></ul></div>
+    </div>
+    <div class="ft-bottom">
+      <span class="ft-copy">© 2026 Hidrotransp S.A.C. Todos los derechos reservados.</span>
+      <div class="ft-soc">
+        <a href="https://www.facebook.com/hidrotranspperu" class="fsoc" target="_blank">fb</a>
+        <a href="https://www.instagram.com/grupohidrotransp" class="fsoc" target="_blank">ig</a>
+        <a href="#" class="fsoc">in</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- THREE.JS CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ───── CURSOR ───── */
+const CUR=document.getElementById('CUR'),CURR=document.getElementById('CURR');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;CUR.style.left=mx+'px';CUR.style.top=my+'px'});
+(function lr(){rx+=(mx-rx)*.1;ry+=(my-ry)*.1;CURR.style.left=rx+'px';CURR.style.top=ry+'px';requestAnimationFrame(lr)})();
+document.querySelectorAll('a,button,.prd,.svc-item,.cd,.opimg').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{CUR.style.width='20px';CUR.style.height='20px';CURR.style.width='56px';CURR.style.height='56px'});
+  el.addEventListener('mouseleave',()=>{CUR.style.width='8px';CUR.style.height='8px';CURR.style.width='32px';CURR.style.height='32px'});
+});
+
+/* ───── NAV ───── */
+window.addEventListener('scroll',()=>document.getElementById('NAV').classList.toggle('scrolled',scrollY>60));
+
+/* ───── HERO SLIDESHOW ───── */
+let si=0;
+const SLIDES=document.querySelectorAll('.hbg'),DOTS=document.querySelectorAll('.si');
+setInterval(()=>{
+  SLIDES[si].classList.remove('on');DOTS[si].classList.remove('on');
+  si=(si+1)%SLIDES.length;
+  SLIDES[si].classList.add('on');DOTS[si].classList.add('on');
+},5500);
+
+/* ───── BACKGROUND PARTICLE CANVAS ───── */
+(function(){
+  const cv=document.getElementById('bg-canvas'),cx=cv.getContext('2d');
+  cv.width=innerWidth;cv.height=innerHeight;
+  window.addEventListener('resize',()=>{cv.width=innerWidth;cv.height=innerHeight});
+  const pts=Array.from({length:120},()=>({
+    x:Math.random()*innerWidth,y:Math.random()*innerHeight,
+    vx:(Math.random()-.5)*.2,vy:-Math.random()*.25-.05,
+    r:Math.random()*1.2+.2,a:Math.random()*.25+.05,
+    c:['#FF7A00','#FFB300','#E8420A','#FF5500'][Math.floor(Math.random()*4)]
+  }));
+  let mox=0,moy=0;
+  document.addEventListener('mousemove',e=>{mox=e.clientX;moy=e.clientY});
+  function draw(){
+    cx.clearRect(0,0,cv.width,cv.height);
+    pts.forEach(p=>{
+      const dx=mox-p.x,dy=moy-p.y,dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<200){const f=.0003*(200-dist);p.vx+=dx*f;p.vy+=dy*f}
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.y<0){p.y=cv.height;p.x=Math.random()*cv.width}
+      if(p.x<0||p.x>cv.width)p.vx*=-1;
+      cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      cx.fillStyle=p.c;cx.globalAlpha=p.a;cx.fill();
+    });
+    cx.globalAlpha=1;
+    // Connect nearby particles
+    pts.forEach((a,i)=>pts.slice(i+1).forEach(b=>{
+      const d=Math.hypot(a.x-b.x,a.y-b.y);
+      if(d<100){cx.beginPath();cx.moveTo(a.x,a.y);cx.lineTo(b.x,b.y);
+        cx.strokeStyle='rgba(255,122,0,'+(0.04*(1-d/100))+')';cx.lineWidth=.5;cx.stroke()}
+    }));
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ───── HERO CANVAS – SCANLINE + VIGNETTE ───── */
+(function(){
+  const cv=document.getElementById('hero-canvas'),cx=cv.getContext('2d');
+  function resize(){cv.width=cv.offsetWidth;cv.height=cv.offsetHeight}
+  resize();window.addEventListener('resize',resize);
+  let t=0;
+  function draw(){
+    cx.clearRect(0,0,cv.width,cv.height);
+    // Scanlines
+    for(let y=0;y<cv.height;y+=4){
+      cx.fillStyle='rgba(0,0,0,'+(0.04+0.02*Math.sin(y*.05+t*.01))+')';
+      cx.fillRect(0,y,cv.width,2);
+    }
+    // Animated energy line
+    cx.beginPath();
+    cx.moveTo(0,cv.height*.7);
+    for(let x=0;x<cv.width;x+=4){
+      const y=cv.height*.7+Math.sin((x+t)*0.008)*12+Math.sin((x+t)*0.02)*4;
+      cx.lineTo(x,y);
+    }
+    cx.strokeStyle='rgba(255,122,0,0.12)';cx.lineWidth=1.5;cx.stroke();
+    t++;requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ───── THREE.JS – CISTERN TRUCK 3D ───── */
+(function(){
+  const el = document.getElementById('scene3d');
+  const cv = document.getElementById('three-canvas');
+  const renderer = new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
+  renderer.setSize(el.offsetWidth,el.offsetHeight);
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setClearColor(0x030406,1);
+  renderer.shadowMap.enabled=true;
+  renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  const scene=new THREE.Scene();
+  scene.fog=new THREE.Fog(0x030406,20,38);
+  const camera=new THREE.PerspectiveCamera(44,el.offsetWidth/el.offsetHeight,0.1,80);
+  camera.position.set(0,4,13);
+  camera.lookAt(0,1.2,0);
+
+  /* MATERIALS */
+  const mRed   =new THREE.MeshStandardMaterial({color:0xCC1A00,metalness:.55,roughness:.30});
+  const mRedDk =new THREE.MeshStandardMaterial({color:0x8B0E00,metalness:.50,roughness:.45});
+  const mTank  =new THREE.MeshStandardMaterial({color:0xCDC5B5,metalness:.90,roughness:.08});
+  const mBand  =new THREE.MeshStandardMaterial({color:0xE5DDD0,metalness:.95,roughness:.04});
+  const mChr   =new THREE.MeshStandardMaterial({color:0xCCCCCC,metalness:.95,roughness:.08});
+  const mChrDk =new THREE.MeshStandardMaterial({color:0x888888,metalness:.90,roughness:.20});
+  const mBlack =new THREE.MeshStandardMaterial({color:0x080808,metalness:.10,roughness:.90});
+  const mTyre  =new THREE.MeshStandardMaterial({color:0x0B0B0B,metalness:.05,roughness:.95});
+  const mRim   =new THREE.MeshStandardMaterial({color:0xBBBBBB,metalness:.92,roughness:.12});
+  const mGlass =new THREE.MeshStandardMaterial({color:0x5588AA,metalness:.05,roughness:.05,transparent:true,opacity:.38,side:THREE.DoubleSide});
+  const mOrng  =new THREE.MeshStandardMaterial({color:0xFF5500,metalness:.30,roughness:.40,emissive:new THREE.Color(0xFF3300),emissiveIntensity:.5});
+  const mLamp  =new THREE.MeshStandardMaterial({color:0xFFEE88,emissive:new THREE.Color(0xFFCC44),emissiveIntensity:2.8,roughness:.1});
+  const mRLamp =new THREE.MeshStandardMaterial({color:0xFF2200,emissive:new THREE.Color(0xFF0000),emissiveIntensity:2.2,roughness:.1});
+  const mUnder =new THREE.MeshStandardMaterial({color:0x181818,metalness:.30,roughness:.75});
+
+  /* TRUCK GROUP — everything here rotates on Y */
+  const truck=new THREE.Group();
+  scene.add(truck);
+
+  /* Shorthand mesh builder */
+  function mk(geo,mat,x,y,z,rx,ry,rz,p){
+    const m=new THREE.Mesh(geo,mat);
+    m.position.set(x,y,z);
+    if(rx||ry||rz) m.rotation.set(rx||0,ry||0,rz||0);
+    m.castShadow=true; m.receiveShadow=true;
+    (p||truck).add(m); return m;
+  }
+
+  /*
+    COORDINATE SYSTEM (truck faces -Z = front):
+    The truck is laid out along the Z axis.
+    Z = -5  → front bumper
+    Z = +5  → rear of cistern
+    Y = 0   → ground level
+    X       → side to side
+
+    CRITICAL: barrel CylinderGeometry is created along Y by default.
+    To make it run along Z (front-to-back) we rotate it by Math.PI/2 on X.
+  */
+
+  /* ═══════════════════════════════
+     1. CHASSIS FRAME
+  ═══════════════════════════════ */
+  // Two side rails running full truck length along Z
+  mk(new THREE.BoxGeometry(.14,.18,10.8),mUnder,  .52,.12, .0);
+  mk(new THREE.BoxGeometry(.14,.18,10.8),mUnder, -.52,.12, .0);
+  // Cross members
+  [-4.2,-3.0,-1.8,-.6,.6,1.8,3.0,4.0].forEach(z=>
+    mk(new THREE.BoxGeometry(1.30,.12,.12),mUnder,0,.12,z)
+  );
+  // Fuel saddle tanks (horizontal, along X, one each side of frame)
+  mk(new THREE.CylinderGeometry(.20,.20,1.0,20),mRedDk, .72,.10,-1.6,0,0,Math.PI/2);
+  mk(new THREE.CylinderGeometry(.20,.20,1.0,20),mRedDk,-.72,.10,-1.6,0,0,Math.PI/2);
+
+  /* ═══════════════════════════════
+     2. CAB (flat-nose / cab-over)
+     Front face: z = -5.0
+     Rear face:  z = -2.8
+  ═══════════════════════════════ */
+  // --- Main cab body
+  mk(new THREE.BoxGeometry(1.88,1.82,2.20),mRed,  0,1.23,-3.90);
+  mk(new THREE.BoxGeometry(1.90,.22,2.20), mRedDk,0,.33,-3.90);  // lower sill
+  mk(new THREE.BoxGeometry(1.88,.14,2.20), mRedDk,0,2.15,-3.90); // roof slab
+
+  // --- FRONT FACE z = -5.01
+  mk(new THREE.BoxGeometry(1.60,.76,.06),mGlass,  0,1.65,-5.01);  // windshield
+  mk(new THREE.BoxGeometry(1.66,.80,.04),mRedDk,  0,1.65,-5.02);  // ws frame
+  mk(new THREE.BoxGeometry(1.88,.80,.06),mRedDk,  0,.75,-5.01);   // lower face panel
+  mk(new THREE.BoxGeometry(1.20,.50,.05),mBlack,  0,.72,-5.04);   // grille opening
+  [.82,.72,.62,.52,.42].forEach(y=>
+    mk(new THREE.BoxGeometry(1.18,.028,.06),mChr,0,y,-5.05)       // grille bars
+  );
+  mk(new THREE.BoxGeometry(.50,.22,.06),mLamp,  .62,.55,-5.04);   // headlights
+  mk(new THREE.BoxGeometry(.50,.22,.06),mLamp, -.62,.55,-5.04);
+  mk(new THREE.BoxGeometry(.46,.05,.05),mLamp,  .62,.40,-5.04);   // DRL strip
+  mk(new THREE.BoxGeometry(.46,.05,.05),mLamp, -.62,.40,-5.04);
+  mk(new THREE.BoxGeometry(1.92,.20,.28),mChr,  0,.12,-4.94);     // front bumper
+  mk(new THREE.BoxGeometry(1.92,.06,.16),mRedDk,0,.04,-4.88);
+  mk(new THREE.BoxGeometry(.06,1.84,.06),mRedDk, .94,1.23,-5.01); // corner posts
+  mk(new THREE.BoxGeometry(.06,1.84,.06),mRedDk,-.94,1.23,-5.01);
+
+  // --- SIDE WINDOWS (big opening per side)
+  mk(new THREE.BoxGeometry(.05,.58,.72),mGlass,  .945,1.62,-3.40);
+  mk(new THREE.BoxGeometry(.05,.58,.72),mGlass, -.945,1.62,-3.40);
+  mk(new THREE.BoxGeometry(.05,.50,.70),mGlass,  .945,1.62,-4.18);
+  mk(new THREE.BoxGeometry(.05,.50,.70),mGlass, -.945,1.62,-4.18);
+
+  // --- DOOR detail
+  mk(new THREE.BoxGeometry(.04,.04,2.18),mRedDk, .945,.90,-3.90);
+  mk(new THREE.BoxGeometry(.04,.04,2.18),mRedDk,-.945,.90,-3.90);
+  mk(new THREE.BoxGeometry(.04,.06,.22),mChr,   .95,1.12,-4.20);
+  mk(new THREE.BoxGeometry(.04,.06,.22),mChr,  -.95,1.12,-4.20);
+
+  // --- Side entry steps
+  [.22,.46].forEach(y=>{
+    mk(new THREE.BoxGeometry(.04,.06,.62),mChr, .96,y,-3.60);
+    mk(new THREE.BoxGeometry(.04,.06,.62),mChr,-.96,y,-3.60);
+  });
+
+  // --- MIRRORS
+  mk(new THREE.BoxGeometry(.06,.06,.30),mChr,  .96,1.82,-4.70);
+  mk(new THREE.BoxGeometry(.06,.06,.30),mChr, -.96,1.82,-4.70);
+  mk(new THREE.BoxGeometry(.24,.16,.04),mBlack,1.12,1.82,-4.85);
+  mk(new THREE.BoxGeometry(.24,.16,.04),mBlack,-1.12,1.82,-4.85);
+
+  // --- ROOF: air deflector spoiler
+  mk(new THREE.BoxGeometry(1.80,.50,.08),mRed, 0,2.20,-4.68,-.35,0,0);
+  mk(new THREE.BoxGeometry(1.80,.06,.42),mRedDk,0,2.40,-4.48);
+  // Beacon
+  mk(new THREE.CylinderGeometry(.09,.09,.07,12),mLamp,0,2.24,-3.60);
+
+  // --- EXHAUST STACKS — two vertical pipes rising beside cab
+  mk(new THREE.CylinderGeometry(.058,.058,1.60,12),mChr, .54,1.55,-2.90);
+  mk(new THREE.CylinderGeometry(.058,.058,1.60,12),mChr,-.54,1.55,-2.90);
+  mk(new THREE.CylinderGeometry(.085,.058,.10,12), mBlack,.54,2.36,-2.90);
+  mk(new THREE.CylinderGeometry(.085,.058,.10,12), mBlack,-.54,2.36,-2.90);
+
+  // --- Back wall of cab
+  mk(new THREE.BoxGeometry(1.88,1.82,.06),mRedDk,0,1.23,-2.79);
+
+  /* ═══════════════════════════════
+     3. CISTERN TANK
+     Positioned BEHIND cab, running along Z (front-to-back)
+     Tank length = 7.5 units
+     Tank center: z=+1.55, y=1.58
+     Front of tank: z = -2.2 (just behind cab)
+     Rear  of tank: z = +5.3
+  ═══════════════════════════════ */
+  const TG=new THREE.Group();
+  TG.position.set(0,1.58,1.55);
+  truck.add(TG);
+
+  // MAIN BARREL — cylinder rotated to run along Z axis (rx = PI/2)
+  const barrel=new THREE.Mesh(
+    new THREE.CylinderGeometry(.86,.86,7.5,56),mTank
+  );
+  barrel.rotation.x=Math.PI/2;   // <-- KEY: makes cylinder run along Z, not Y
+  barrel.castShadow=true; barrel.receiveShadow=true;
+  TG.add(barrel);
+
+  // FRONT END CAP (z = -3.75 in tank-local space)
+  const capF=new THREE.Mesh(
+    new THREE.SphereGeometry(.86,40,24,0,Math.PI*2,0,Math.PI/2),mTank
+  );
+  capF.rotation.x=-Math.PI/2;    // hemisphere pointing in -Z
+  capF.position.z=-3.75;
+  capF.castShadow=true; TG.add(capF);
+
+  // REAR END CAP (z = +3.75)
+  const capR=new THREE.Mesh(
+    new THREE.SphereGeometry(.86,40,24,0,Math.PI*2,0,Math.PI/2),mTank
+  );
+  capR.rotation.x=Math.PI/2;     // hemisphere pointing in +Z
+  capR.position.z=3.75;
+  capR.castShadow=true; TG.add(capR);
+
+  // STRUCTURAL BANDS (toruses, axes = Z, so no rotation needed—default is XY plane which wraps around Z)
+  [-2.8,-1.4,0,1.4,2.8].forEach(z=>{
+    const band=new THREE.Mesh(
+      new THREE.TorusGeometry(.875,.038,10,52),mBand
+    );
+    band.rotation.x=Math.PI/2;   // align torus so it wraps around the Z-running barrel
+    band.position.z=z;
+    band.castShadow=true; TG.add(band);
+  });
+
+  // TOP WALKWAY / CATWALK
+  mk(new THREE.BoxGeometry(.55,.06,7.2),mChrDk,0,.88,0,0,0,0,TG);
+  mk(new THREE.BoxGeometry(.02,.12,7.2),mChr,  .275,.97,0,0,0,0,TG);  // rail left
+  mk(new THREE.BoxGeometry(.02,.12,7.2),mChr, -.275,.97,0,0,0,0,TG);  // rail right
+  [-3.0,-1.5,0,1.5,3.0].forEach(z=>{
+    mk(new THREE.BoxGeometry(.02,.12,.02),mChr, .275,.93,z,0,0,0,TG);
+    mk(new THREE.BoxGeometry(.02,.12,.02),mChr,-.275,.93,z,0,0,0,TG);
+  });
+
+  // MANHOLE DOME on top
+  const domeMesh=new THREE.Mesh(
+    new THREE.SphereGeometry(.13,16,8,0,Math.PI*2,0,Math.PI/2),mChr
+  );
+  domeMesh.rotation.x=-Math.PI/2; domeMesh.position.set(0,.89,0); TG.add(domeMesh);
+  mk(new THREE.CylinderGeometry(.13,.13,.06,14),mChr,0,.87,0,0,0,0,TG);
+
+  // REAR DISCHARGE VALVES (3 outlets, at back of tank face z=+3.75)
+  [-0.32,0,.32].forEach(x=>{
+    mk(new THREE.CylinderGeometry(.075,.075,.34,10),mChr,x,-.52,3.77,Math.PI/2,0,0,TG);
+    mk(new THREE.CylinderGeometry(.11,.11,.04,10),  mRedDk,x,-.52,3.99,Math.PI/2,0,0,TG);
+  });
+
+  // ORANGE STRIPE both sides
+  mk(new THREE.BoxGeometry(.02,.10,7.4),mOrng,  .875,-.05,0,0,0,0,TG);
+  mk(new THREE.BoxGeometry(.02,.10,7.4),mOrng, -.875,-.05,0,0,0,0,TG);
+
+  // BRAND PLATE on right side
+  mk(new THREE.BoxGeometry(.04,.34,2.60),mOrng,.88,.12,0,0,0,0,TG);
+
+  // REAR LIGHTS
+  mk(new THREE.BoxGeometry(.05,.16,.08),mRLamp, .65,.10,3.78,0,0,0,TG);
+  mk(new THREE.BoxGeometry(.05,.16,.08),mRLamp,-.65,.10,3.78,0,0,0,TG);
+  mk(new THREE.BoxGeometry(.05,.16,.08),mOrng,  .30,.10,3.78,0,0,0,TG);
+  mk(new THREE.BoxGeometry(.05,.16,.08),mOrng, -.30,.10,3.78,0,0,0,TG);
+
+  /* ═══════════════════════════════
+     4. WHEELS
+     Front steer axle z=-3.6 (single)
+     Drive axle 1     z=+1.8 (dual)
+     Drive axle 2     z=+3.3 (dual)
+  ═══════════════════════════════ */
+  const wGroups=[];
+  function mkWheel(xSide,zPos,isDual){
+    const g=new THREE.Group();
+    // outer tyre — torus in XZ plane = Y-axis torus — rotate so it faces X
+    const outerT=new THREE.Mesh(new THREE.TorusGeometry(.54,.185,22,48),mTyre);
+    outerT.rotation.y=Math.PI/2; g.add(outerT);
+    if(isDual){
+      const innerT=new THREE.Mesh(new THREE.TorusGeometry(.51,.155,22,48),mTyre);
+      innerT.rotation.y=Math.PI/2;
+      innerT.position.x=xSide>0?.34:-.34; g.add(innerT);
+    }
+    // Rim disc — cylinder along X
+    const rimD=new THREE.Mesh(new THREE.CylinderGeometry(.40,.40,.12,32),mRim);
+    rimD.rotation.z=Math.PI/2; g.add(rimD);
+    // Hub
+    const hub=new THREE.Mesh(new THREE.CylinderGeometry(.13,.13,.14,14),mChr);
+    hub.rotation.z=Math.PI/2; g.add(hub);
+    // Lugs
+    for(let i=0;i<8;i++){
+      const a=i/8*Math.PI*2;
+      const ln=new THREE.Mesh(new THREE.CylinderGeometry(.034,.034,.14,7),mChr);
+      ln.rotation.z=Math.PI/2;
+      ln.position.y=Math.sin(a)*.27; ln.position.z=Math.cos(a)*.27; g.add(ln);
+    }
+    // Spokes
+    for(let i=0;i<5;i++){
+      const a=i/5*Math.PI*2;
+      const sp=new THREE.Mesh(new THREE.BoxGeometry(.06,.07,.34),mRim);
+      sp.rotation.z=Math.PI/2; sp.rotation.x=a;
+      sp.position.y=Math.sin(a)*.18; sp.position.z=Math.cos(a)*.18; g.add(sp);
+    }
+    g.position.set(xSide,-.72,zPos);
+    truck.add(g); wGroups.push(g);
+
+    // Mudguard (arc) — static, not in wheel group
+    const mud=new THREE.Mesh(
+      new THREE.TorusGeometry(.60,.065,8,28,.82*Math.PI),mRedDk
+    );
+    mud.rotation.z=Math.PI*.60; mud.rotation.y=Math.PI/2;
+    mud.position.set(xSide,-.68+.60,zPos);
+    truck.add(mud);
+  }
+  mkWheel(-1.05,-3.60,false); mkWheel(1.05,-3.60,false);
+  mkWheel(-1.16, 1.80,true);  mkWheel(1.16, 1.80,true);
+  mkWheel(-1.16, 3.30,true);  mkWheel(1.16, 3.30,true);
+
+  // Axle beams
+  mk(new THREE.BoxGeometry(2.20,.10,.14),mChrDk,0,-.72,-3.60);
+  mk(new THREE.BoxGeometry(2.48,.10,.14),mChrDk,0,-.72, 1.80);
+  mk(new THREE.BoxGeometry(2.48,.10,.14),mChrDk,0,-.72, 3.30);
+
+  // Landing gear
+  mk(new THREE.BoxGeometry(.10,.68,.10),mChr,  .46,-.30,-2.20);
+  mk(new THREE.BoxGeometry(.10,.68,.10),mChr, -.46,-.30,-2.20);
+  mk(new THREE.BoxGeometry(.34,.06,.20),mChr,  .46,-.70,-2.20);
+  mk(new THREE.BoxGeometry(.34,.06,.20),mChr, -.46,-.70,-2.20);
+
+  // Rear underguard bar
+  mk(new THREE.BoxGeometry(2.10,.08,.08),mChr,0,-.72,4.80);
+
+  /* ═══════════════════════════════
+     5. GROUND
+  ═══════════════════════════════ */
+  const gnd=new THREE.Mesh(
+    new THREE.PlaneGeometry(50,50),
+    new THREE.MeshStandardMaterial({color:0x040408,metalness:.72,roughness:.28})
+  );
+  gnd.rotation.x=-Math.PI/2; gnd.position.y=-1.26; gnd.receiveShadow=true;
+  scene.add(gnd);
+
+  const glow=new THREE.Mesh(
+    new THREE.PlaneGeometry(10,3.2),
+    new THREE.MeshBasicMaterial({color:0xFF3300,transparent:true,opacity:.055})
+  );
+  glow.rotation.x=-Math.PI/2; glow.position.y=-1.24; scene.add(glow);
+
+  /* ═══════════════════════════════
+     6. PARTICLE SPHERE
+  ═══════════════════════════════ */
+  const N=5500;
+  const pp=new Float32Array(N*3),pc=new Float32Array(N*3);
+  const pal=[[1,.47,0],[1,.70,0],[.91,.26,.04],[1,.34,0],[.75,.20,0]];
+  for(let i=0;i<N;i++){
+    const phi=Math.acos(2*Math.random()-1),th=Math.random()*Math.PI*2;
+    const r=5.8+Math.random()*2.0;
+    pp[i*3]=r*Math.sin(phi)*Math.cos(th);
+    pp[i*3+1]=r*Math.sin(phi)*Math.sin(th);
+    pp[i*3+2]=r*Math.cos(phi);
+    const col=pal[Math.floor(Math.random()*pal.length)];
+    pc[i*3]=col[0]; pc[i*3+1]=col[1]; pc[i*3+2]=col[2];
+  }
+  const ptG=new THREE.BufferGeometry();
+  ptG.setAttribute('position',new THREE.BufferAttribute(pp,3));
+  ptG.setAttribute('color',new THREE.BufferAttribute(pc,3));
+  const ptCloud=new THREE.Points(ptG,new THREE.PointsMaterial({size:.055,vertexColors:true,transparent:true,opacity:.82,sizeAttenuation:true}));
+  scene.add(ptCloud);
+
+  /* ═══════════════════════════════
+     7. ORBITAL RINGS
+  ═══════════════════════════════ */
+  function mkRing(r,t,col,op,rx,ry){
+    const m=new THREE.Mesh(new THREE.TorusGeometry(r,t,8,160),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:op}));
+    m.rotation.x=rx; m.rotation.y=ry; scene.add(m); return m;
+  }
+  const ring1=mkRing(6.4,.014,0xFF7A00,.32, Math.PI*.18,0);
+  const ring2=mkRing(7.2,.008,0xFF3300,.18,-Math.PI*.28,Math.PI*.12);
+  const ring3=mkRing(5.5,.006,0xFFB300,.25, Math.PI*.50,Math.PI*.08);
+
+  /* ═══════════════════════════════
+     8. LIGHTS
+  ═══════════════════════════════ */
+  const keyL=new THREE.PointLight(0xFF8844,12,30);
+  keyL.castShadow=true; keyL.shadow.mapSize.set(1024,1024); scene.add(keyL);
+  const fillL=new THREE.PointLight(0xFF2200,3,18);
+  fillL.position.set(-4,1,3); scene.add(fillL);
+  const sun=new THREE.DirectionalLight(0xFFCC88,2.5);
+  sun.position.set(3,10,4); sun.castShadow=true; scene.add(sun);
+  const rimL=new THREE.DirectionalLight(0xFF4400,1.2);
+  rimL.position.set(0,2,-9); scene.add(rimL);
+  scene.add(new THREE.AmbientLight(0x1A0800,2.5));
+  const bnc=new THREE.PointLight(0xFF6600,2,10);
+  bnc.position.set(0,-1,0); scene.add(bnc);
+
+  /* MOUSE PARALLAX */
+  let tmx=0,tmy=0;
+  document.addEventListener('mousemove',e=>{
+    const r=el.getBoundingClientRect();
+    if(e.clientY>r.top&&e.clientY<r.bottom){
+      tmx=(e.clientX/window.innerWidth-.5)*1.4;
+      tmy=-(e.clientY/window.innerHeight-.5)*.7;
+    }
+  });
+
+  /* ANIMATE */
+  let t=0;
+  function animate(){
+    requestAnimationFrame(animate); t+=.005;
+    truck.rotation.y=t*.28;
+    const ws=-t*2.5;
+    wGroups.forEach(wg=>wg.children.forEach(c=>{
+      if(c.geometry&&c.geometry.type==='TorusGeometry') c.rotation.x=ws;
+    }));
+    ptCloud.rotation.y-=.001; ptCloud.rotation.x+=.0003;
+    ring1.rotation.z+=.003; ring2.rotation.y+=.005; ring3.rotation.x+=.004;
+    keyL.position.x=Math.sin(t)*7;
+    keyL.position.z=Math.cos(t)*7;
+    keyL.position.y=Math.sin(t*.55)*3+3;
+    camera.position.x+=(tmx-camera.position.x)*.032;
+    camera.position.y+=(tmy+4.0-camera.position.y)*.032;
+    camera.lookAt(0,1.2,0);
+    renderer.render(scene,camera);
+  }
+  animate();
+
+  window.addEventListener('resize',()=>{
+    const nW=el.offsetWidth,nH=el.offsetHeight;
+    camera.aspect=nW/nH; camera.updateProjectionMatrix(); renderer.setSize(nW,nH);
+  });
+})();
+
+
+/* ───── CTA CANVAS – NEBULA ───── */
+(function(){
+  const cv=document.getElementById('cta-canvas'),cx=cv.getContext('2d');
+  function resize(){cv.width=cv.offsetWidth;cv.height=cv.offsetHeight}
+  resize();window.addEventListener('resize',resize);
+  const P=Array.from({length:200},()=>({
+    x:Math.random()*cv.width,y:Math.random()*cv.height,
+    vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,
+    r:Math.random()*1.5+.3,a:Math.random()*.3+.05,
+    c:['255,122,0','255,179,0','232,66,10'][Math.floor(Math.random()*3)]
+  }));
+  function draw(){
+    cx.clearRect(0,0,cv.width,cv.height);
+    P.forEach(p=>{
+      p.x=(p.x+p.vx+cv.width)%cv.width;
+      p.y=(p.y+p.vy+cv.height)%cv.height;
+      cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      cx.fillStyle=`rgba(${p.c},${p.a})`;cx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ───── BENTO GALLERY REVEAL ───── */
+(function(){
+  const cells=document.querySelectorAll('.bt');
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('bv'); });
+  },{threshold:.12});
+  cells.forEach(el=>obs.observe(el));
+})();
+
+/* ───── REVEAL ON SCROLL ───── */
+const rvObs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('on')}),{threshold:.1});
+document.querySelectorAll('.rv').forEach(el=>rvObs.observe(el));
+
+/* ───── PARALLAX HERO ───── */
+window.addEventListener('scroll',()=>{
+  const y=scrollY;
+  document.querySelectorAll('.hbg').forEach(b=>b.style.transform=`scale(1.05) translateY(${y*.12}px)`);
+});
+
+
+/* ───── SECTION SCROLL ANIMATIONS ───── */
+(function(){
+
+  /* ── Animated counters with easing */
+  const counters = document.querySelectorAll('.cnt');
+  const cObs = new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      if(!entry.isIntersecting) return;
+      const el = entry.target;
+      const target = parseFloat(el.dataset.t);
+      const isFloat = el.dataset.t.includes('.');
+      const dur = 2200;
+      const start = performance.now();
+      function tick(now){
+        const p = Math.min((now-start)/dur, 1);
+        const ease = 1-Math.pow(1-p,4);
+        const val = target*ease;
+        el.textContent = isFloat ? val.toFixed(1) : Math.round(val);
+        if(p<1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+      cObs.unobserve(el);
+    });
+  },{threshold:.4});
+  counters.forEach(el=>cObs.observe(el));
+
+  /* ── Live data ticker in floating dashboard */
+  function randomDrift(val, pct){
+    return (val*(1+(Math.random()-.5)*pct)).toFixed(0);
+  }
+  // Add a live ticker element to stat cards if they exist
+  const statCards = document.querySelectorAll('.stat-c');
+  statCards.forEach((card,i)=>{
+    const glow = document.createElement('div');
+    glow.style.cssText = `position:absolute;bottom:0;left:0;right:0;height:1px;
+      background:linear-gradient(90deg,transparent,rgba(255,122,0,.0),transparent);
+      transition:background 1s;`;
+    card.style.position='relative';
+    card.appendChild(glow);
+    // Pulse glow on hover
+    card.addEventListener('mouseenter',()=>{
+      glow.style.background='linear-gradient(90deg,transparent,rgba(255,122,0,.6),transparent)';
+      glow.style.boxShadow='0 0 12px rgba(255,122,0,.4)';
+    });
+    card.addEventListener('mouseleave',()=>{
+      glow.style.background='linear-gradient(90deg,transparent,rgba(255,122,0,.0),transparent)';
+      glow.style.boxShadow='none';
+    });
+  });
+
+  /* ── Product cards: tilt 3D on mouse */
+  document.querySelectorAll('.prd').forEach(card=>{
+    card.addEventListener('mousemove',e=>{
+      const r=card.getBoundingClientRect();
+      const x=(e.clientX-r.left)/r.width-.5;
+      const y=(e.clientY-r.top)/r.height-.5;
+      card.style.transform=`perspective(800px) rotateY(${x*10}deg) rotateX(${-y*8}deg) scale(1.02)`;
+    });
+    card.addEventListener('mouseleave',()=>{
+      card.style.transform='perspective(800px) rotateY(0) rotateX(0) scale(1)';
+      card.style.transition='transform .6s cubic-bezier(.23,1,.32,1)';
+    });
+    card.addEventListener('mouseenter',()=>{ card.style.transition='transform .15s'; });
+  });
+
+  /* ── Service items: sliding indicator bar */
+  document.querySelectorAll('.svc-item').forEach(item=>{
+    const bar = item.querySelector('.svc-bar');
+    item.addEventListener('mouseenter',()=>{
+      if(bar){ bar.style.background='var(--a)'; bar.style.boxShadow='0 0 8px rgba(255,122,0,.5)'; }
+    });
+    item.addEventListener('mouseleave',()=>{
+      if(bar){ bar.style.background='rgba(255,255,255,.08)'; bar.style.boxShadow='none'; }
+    });
+  });
+
+  /* ── Gallery drag scroll with momentum */
+  const track = document.getElementById('OPS');
+  if(track){
+    let isDown=false, startX, sl, velX=0, lastX=0, raf;
+    track.addEventListener('mousedown',e=>{
+      isDown=true; startX=e.pageX-track.offsetLeft; sl=track.scrollLeft;
+      lastX=e.pageX; velX=0;
+      track.style.cursor='grabbing';
+    });
+    document.addEventListener('mouseup',()=>{
+      if(!isDown)return; isDown=false; track.style.cursor='grab';
+      // momentum
+      (function glide(){
+        velX*=.92;
+        track.scrollLeft+=velX;
+        if(Math.abs(velX)>.5) requestAnimationFrame(glide);
+      })();
+    });
+    track.addEventListener('mousemove',e=>{
+      if(!isDown)return; e.preventDefault();
+      const x=e.pageX-track.offsetLeft;
+      const walk=(x-startX)*1.4;
+      track.scrollLeft=sl-walk;
+      velX=e.pageX-lastX; lastX=e.pageX;
+    });
+  }
+
+  /* ── Parallax on section background images */
+  const prdCards = document.querySelectorAll('.prd img');
+  window.addEventListener('scroll',()=>{
+    const sy=window.scrollY;
+    prdCards.forEach(img=>{
+      const rect=img.closest('.prd').getBoundingClientRect();
+      const center=rect.top+rect.height/2-window.innerHeight/2;
+      img.style.transform=`scale(1.1) translateY(${center*.04}px)`;
+    });
+    // Parallax on services image
+    const svcImg = document.querySelector('.svc-img-main');
+    if(svcImg){
+      const rect=svcImg.getBoundingClientRect();
+      const p=(rect.top+rect.height/2-window.innerHeight/2)*.05;
+      svcImg.style.transform=`translateY(${p}px)`;
+    }
+  });
+
+  /* ── Typing effect on hero subtitle */
+  const heroSub = document.querySelector('.hero-sub');
+  if(heroSub){
+    const txt = heroSub.textContent;
+    heroSub.textContent='';
+    let i=0;
+    const typer=setInterval(()=>{
+      heroSub.textContent=txt.slice(0,i);
+      i++;
+      if(i>txt.length) clearInterval(typer);
+    },28);
+  }
+
+  /* ── Animate metric bars in 3D section */
+  const metricObs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(!e.isIntersecting) return;
+      e.target.querySelectorAll('.metric-val').forEach((val,i)=>{
+        setTimeout(()=>{
+          val.style.transition='color .3s, text-shadow .3s';
+          val.style.textShadow='0 0 12px rgba(255,122,0,.7)';
+          setTimeout(()=>{ val.style.textShadow='none'; },600);
+        },i*200);
+      });
+    });
+  },{threshold:.3});
+  const s3d=document.getElementById('scene3d');
+  if(s3d) metricObs.observe(s3d);
+
+  /* ── Scroll progress bar */
+  const prog=document.createElement('div');
+  prog.style.cssText=`position:fixed;top:0;left:0;height:2px;z-index:9999;
+    background:linear-gradient(90deg,#E8420A,#FF7A00,#FFB300);
+    transition:width .1s;width:0%;pointer-events:none;
+    box-shadow:0 0 8px rgba(255,122,0,.6)`;
+  document.body.appendChild(prog);
+  window.addEventListener('scroll',()=>{
+    const pct=window.scrollY/(document.body.scrollHeight-window.innerHeight)*100;
+    prog.style.width=pct+'%';
+  });
+
+  /* ── Client logo hover: reveal colored version */
+  document.querySelectorAll('.cl-track img').forEach(img=>{
+    img.addEventListener('mouseenter',()=>{
+      img.style.filter='brightness(1) invert(0)';
+      img.style.opacity='.7';
+    });
+    img.addEventListener('mouseleave',()=>{
+      img.style.filter='brightness(0) invert(1)';
+      img.style.opacity='.18';
+    });
+  });
+
+  /* ── Form field focus glow */
+  document.querySelectorAll('.field input, .field textarea, .field select').forEach(el=>{
+    el.addEventListener('focus',()=>{
+      el.style.background='rgba(255,122,0,.04)';
+      el.style.boxShadow='0 0 0 1px rgba(255,122,0,.3), 0 0 16px rgba(255,122,0,.1)';
+    });
+    el.addEventListener('blur',()=>{
+      el.style.background='rgba(255,255,255,.03)';
+      el.style.boxShadow='none';
+    });
+  });
+
+  /* ── Submit button: ripple + "sending" state */
+  const cfBtn = document.querySelector('.cf-btn');
+  if(cfBtn){
+    cfBtn.addEventListener('click',e=>{
+      e.preventDefault();
+      const orig=cfBtn.textContent;
+      cfBtn.textContent='Enviando...';
+      cfBtn.style.opacity='.7';
+      setTimeout(()=>{
+        cfBtn.textContent='✓ Mensaje enviado';
+        cfBtn.style.opacity='1';
+        cfBtn.style.background='linear-gradient(135deg,#00AA55,#00CC66)';
+        setTimeout(()=>{
+          cfBtn.textContent=orig;
+          cfBtn.style.background='linear-gradient(135deg,var(--f),var(--a))';
+        },3000);
+      },1800);
+    });
+  }
+
+})();
+</script>
+</body>
+</html>
